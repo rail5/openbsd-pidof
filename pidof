@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Imitate basic functionality of SysVInit 'pidof'
+## This script doesn't bother about most of the available options in the actual 'pidof' utility
+## Only the basic "pidof name1 name2 name3" etc
+
+pids=0
+
+OLDIFS="$IFS"
+
+IFS="
+"
+
+for arg in "${@}"; do
+	result=$(ps aux | grep "$arg")
+	
+	for line in $result; do
+
+		if [ "$(basename $(echo "$line" | awk '{print $11}'))" != "$arg" ]; then
+			continue;
+		fi
+
+		pid="$(echo "$line" | awk '{print $2}')"
+		
+		if [ $pids -gt 0 ]; then
+			printf " "
+		fi
+
+		printf "$pid"
+
+		pids=$(expr $pids + 1)
+	done
+
+done
+
+printf "\n"
+
+IFS="$OLDIFS"
